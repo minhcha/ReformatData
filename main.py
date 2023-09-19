@@ -1,3 +1,22 @@
+# Setting:
+#   Have to paste test.robot file to save_path before run the code
+#   Input some required paths into variables below
+
+# Still not cover yet:
+#   There are more than 1 line of expected data
+#   Comment tag   =>   Had coded to cover it but not work
+#   If there is exception when you run the code, you have to:
+#       1. Delete all data in save_path but test.robot file and run from the beginning
+#       or
+#       2. Change data in load file to save your time
+#   This bug appears some time in different place, Still don't know the reason
+#       PermissionError: [WinError 32]
+#       The process cannot access the file because it is being used by another process:
+#       'C:/TestData/C128_SubsetC_FNC1_Pos_4_7Chars.bmp'
+#       'C:/TestData/UPCA_PW4.bmp'
+#       'C:/TestData/EAN8_P2.bmp'
+#   =>  Maybe because of the work of another app ???
+
 import os
 import shutil
 import array
@@ -6,17 +25,15 @@ import xml.etree.ElementTree as ET
 # Variable
 
 # Required path
-file_load_path = "E:/PLATFORM/DLL/ReformatData/TEST/FileLoadInput/VL5.load"
+file_load_path = "C:/VL_EVL/vl_test_tool_config/Test_Suite/Function/VL5.load"
 # Folder that used to save data
-test_result_path = "E:/PLATFORM/DLL/ReformatData/TEST/TestSuiteNew/"
-
+test_result_path = "C:/TestData/"
 # Place that save vlc file and itc file
-vlc_itc_path = "E:/PLATFORM/DLL/vl_test_tool_config/"
-
+vlc_itc_path = "C:/VL_EVL/vl_test_tool_config/"
 # Image folder
-image_origin_path = "E:/PLATFORM/IP-TECH/"
+image_origin_path = "//dl44h0lb3/IP-TECH/"
 # Robo file path
-robo_path = "E:/PLATFORM/DLL/ReformatData/TEST/TestSuiteNew/test.robot"
+robo_path = "C:/TestData/test.robot"
 
 # Global variable:
 # Address of sym folder
@@ -25,9 +42,6 @@ symbology_path = ""
 testtype_path = ""
 # Address of testcase folder
 TCID_path = ""
-
-
-
 
 
 # To delete special character
@@ -95,7 +109,7 @@ for symbology_content in root:
                 if continue_flag is None:
                     continue
 
-                expected_data = ""
+                expected_data = itc_symbology_content.find("expected_data").text
                 if itc_symbology_content.find("expected_data").text is None:
                     expected_data = '""'
                 else:
