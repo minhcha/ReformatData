@@ -39,7 +39,7 @@ robo_path = "C:/TestData/test.robot"
 # Address of sym folder
 symbology_path = ""
 # Address of test type folder
-testtype_path = ""
+test_type_path = ""
 # Address of testcase folder
 TCID_path = ""
 
@@ -63,17 +63,17 @@ for symbology_content in root:
     symbology_path = symbology_path + "/"
     print("Symbology: ", sym_name)
 
-    for testtype_content in symbology_content:
-        type_name = testtype_content.text.strip()
+    for test_type_content in symbology_content:
+        type_name = test_type_content.text.strip()
         type_name = reformat_folder_name(type_name)
-        testtype_path = symbology_path + type_name
-        os.makedirs(testtype_path)
-        testtype_path = testtype_path + "/"
+        test_type_path = symbology_path + type_name
+        os.makedirs(test_type_path)
+        test_type_path = test_type_path + "/"
         print("Test type: ", type_name)
 
-        for testcase_content in testtype_content:
+        for testcase_content in test_type_content:
             testcase_id = testcase_content.find('ExpectResultID').text
-            TCID_path = testtype_path + testcase_id
+            TCID_path = test_type_path + testcase_id
             os.makedirs(TCID_path)
             print("Testcase ID: ", testcase_id)
 
@@ -82,16 +82,18 @@ for symbology_content in root:
 
             vlc_path = testcase_content.find('VLC_Path').text.replace("\\", "/")
             vlc_sou = vlc_itc_path + vlc_path
-            vlc_des = TCID_path + "/" + testcase_id + ".vlc"
+            vlc_name = os.path.basename(vlc_sou)
+            vlc_des = TCID_path + "/" + vlc_name
             shutil.copy(vlc_sou, vlc_des)
 
             itc_path = testcase_content.find('Img_Path').text.replace("\\", "/")
             itc_sou = vlc_itc_path + itc_path
+            itc_name = os.path.basename(itc_sou).replace(".itc", "")
             itc_file = ET.parse(itc_sou)
             read_itc_file = itc_file.getroot()
             print("Path of itc file", itc_sou)
 
-            csv_path = TCID_path + "/" + testcase_id + "set.csv"
+            csv_path = TCID_path + "/" + itc_name + "_set.csv"
             csv = open(csv_path, "w")
             csv_data = "No,Image,Content\n"
             csv.write(csv_data)
@@ -114,7 +116,7 @@ for symbology_content in root:
                     expected_data = '""'
                 else:
                     expected_data = '"' + expected_data + '"'
-                csv_data = "0," + image_name + "," + expected_data + "\n"
+                csv_data = '0,' + image_name + ',""' + expected_data + '"\n'
                 csv.write(csv_data)
                 print("Write data ", csv_data, " success ")
 
