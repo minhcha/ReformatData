@@ -40,20 +40,18 @@ for symbology_content in root:
     sym_name = symbology_content.text.strip()
     symbology_path = test_result_path + sym_name
     os.makedirs(symbology_path)
-    symbology_path = symbology_path + "/"
     print("Symbology: ", sym_name)
 
     for test_type_content in symbology_content:
         type_name = test_type_content.text.strip()
         type_name = reformat_folder_name(type_name)
-        test_type_path = symbology_path + type_name
+        test_type_path = symbology_path + "/" + type_name
         os.makedirs(test_type_path)
-        test_type_path = test_type_path + "/"
         print("Test type: ", type_name)
 
         for testcase_content in test_type_content:
             testcase_id = testcase_content.find('ExpectResultID').text
-            TCID_path = test_type_path + testcase_id
+            TCID_path = test_type_path + "/"+ testcase_id
             os.makedirs(TCID_path)
             print("Testcase ID: ", testcase_id)
 
@@ -92,7 +90,7 @@ for symbology_content in root:
                     continue
 
                 expected_data = itc_symbology_content.find("expected_data").text
-                if itc_symbology_content.find("expected_data").text is None:
+                if expected_data is None:
                     expected_data = '""'
                 else:
                     expected_data = '"' + expected_data + '"'
