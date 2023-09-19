@@ -20,6 +20,7 @@
 import os
 import shutil
 import array
+import xml.etree.ElementTree as ET
 
 # Variable
 
@@ -34,7 +35,9 @@ vlc_itc_path = "C:/VL_EVL/vl_test_tool_config/"
 # Have to paste the test.robot file to save path before run the code
 test_robot_path = save_path + "test.robot"
 # Image folder
-image_origin_path = "//dl44h0lb3/IP-TECH"
+image_origin_path = "//dl44h0lb3/IP-TECH/"
+# Robo file path
+robo_path = "C:/TestData/test.robot"
 
 # Global variable:
 # Address of sym folder
@@ -47,16 +50,16 @@ address_level_3 = ""
 image_list = [1, 3.5, "Hello"]
 
 
-def create_folder(folder_name, father_address):
-    print(folder_name)
-    address = father_address + folder_name
-    os.makedirs(address)
-    print("Created folder: ", address)
-    return address
-
-
-def copy_test_robot(path):
-    shutil.copy(test_robot_path, path)
+# def create_folder(folder_name, father_address):
+#     print(folder_name)
+#     address = father_address + folder_name
+#     os.makedirs(address)
+#     print("Created folder: ", address)
+#     return address
+#
+#
+# def copy_test_robot(path):
+#     shutil.copy(test_robot_path, path)
 
 
 # To delete special character
@@ -68,196 +71,263 @@ def reformat_folder_name(folder_name):
     return temp_name
 
 
-# Open file load
-with open(file_load_path, mode='r', encoding='utf-8') as f:
-    # Read data
-    data_in_line = f.readline()
+# # Open file load
+# with open(file_load_path, mode='r', encoding='utf-8') as f:
+#     # Read data
+#     data_in_line = f.readline()
+#
+#     # Delete " " from data
+#     data_in_line = data_in_line.strip()
+#
+#     # Stop flag for while loop
+#     stop = 0
+#
+#     while stop != 1:
+#
+#         # Find sym tag
+#         found_sym = data_in_line.find("<symbology>")
+#
+#         # If there is sym tag in the line
+#         if found_sym != -1:
+#             # Clear sym tag
+#             data_in_line = data_in_line.strip("<symbology>")
+#             # Change " " to "_"
+#             data_in_line = data_in_line.replace(" ", "_")
+#             # Create grand folder of Sym
+#             address_level_1 = create_folder(data_in_line, save_path)
+#             address_level_1 = address_level_1 + "/"
+#             print("Test sym: ", data_in_line)
+#
+#         # Find Test Type tag
+#         found_type = data_in_line.find("<Test_Type>")
+#
+#         # If there is a test type tag
+#         if found_type != -1:
+#             # Delete Test Type tag
+#             data_in_line = data_in_line.replace("<Test_Type>", "")
+#             # If there is special character in Test Type, delete it
+#             if not data_in_line.isalnum():
+#                 data_in_line = reformat_folder_name(data_in_line)
+#
+#             # Create father folder with the name is test type
+#             address_level_2 = create_folder(data_in_line, address_level_1)
+#             address_level_2 = address_level_2 + "/"
+#             print("Test type: ", data_in_line)
+#
+#         # Find ExpectResultID tag
+#         found_id = data_in_line.find("<ExpectResultID>")
+#
+#         # If there is a ExpectResultID tag
+#         if found_id != -1:
+#             # Delete ExpectResultID open tag
+#             data_in_line = data_in_line[16:]
+#             # Delete ExpectResultID close tag
+#             data_in_line = data_in_line.replace("</ExpectResultID>", "")
+#             # Change " " to "_"
+#             data_in_line = data_in_line.replace(" ", "_")
+#             # Create test case folder with name is ExpectResultID
+#             address_level_3 = create_folder(data_in_line, address_level_2)
+#
+#             # Copy vlc file to testcase folder
+#             vlc_new_path = address_level_3 + "/" + data_in_line + ".vlc"
+#             shutil.copy(vlc_temp, vlc_new_path)
+#             os.remove(vlc_temp)
+#
+#             # Copy robo file to testcase folder
+#             robo_path = address_level_3 + "/test.robot"
+#             copy_test_robot(robo_path)
+#             print("Test case: ", data_in_line)
+#
+#             # Image_list is list of image name that read from itc file
+#             for x in image_list:
+#                 copy_flag = 0
+#                 image_path = address_level_3 + "/" + x
+#                 image_temp_path = save_path + x
+#                 list_file = os.listdir(save_path)
+#                 # If the image is already in temp folder, copy flag = 1
+#                 for y in list_file:
+#                     if y == x:
+#                         copy_flag = 1
+#                 # If copy flag = 1, copy image file to testcase folder
+#                 if copy_flag == 1:
+#                     shutil.move(image_temp_path, image_path)
+#                     print("Move file ", x, " success")
+#                 # Announce that the image is already in side the testcase folder
+#                 else:
+#                     print("----- itc file contain 2 ", x, ", check in ", address_level_3, "-----")
+#
+#             # Copy csv file to test case folder
+#             csv_path_temp = save_path + "set.csv"
+#             csv_path = address_level_3 + "/" + data_in_line + "set.csv"
+#             shutil.copy(csv_path_temp, csv_path)
+#             print("Create csv file success")
+#             os.remove(csv_path_temp)
+#
+#         # Find VLC_Path tag
+#         found_vlc = data_in_line.find("<VLC_Path>")
+#         # If there is VLC_Path
+#         if found_vlc != -1:
+#             # Delete open tag and close tag
+#             data_in_line = data_in_line.strip("<VLC_Path>")
+#             data_in_line = data_in_line.strip("</VLC_Path>")
+#             # vlc path temp is the absolute path to vlc folder in load file
+#             vlc_path_temp = vlc_itc_path + data_in_line
+#             vlc_path_temp = vlc_path_temp.replace("\\", "/")
+#             # Copy it to temp folder
+#             shutil.copy(vlc_path_temp, vlc_temp)
+#             print("Copied vlc file to ", vlc_path_temp)
+#
+#         # Find Img_Path tag
+#         found_itc = data_in_line.find("<Img_Path>")
+#         # If there is Img_Path
+#         if found_itc != -1:
+#             # Delete open tag and close tag
+#             data_in_line = data_in_line.strip("<Img_Path>")
+#             data_in_line = data_in_line.strip("</Img_Path>")
+#
+#             # itc_path_temp is the absolute path to itc file that written in load file
+#             itc_path_temp = vlc_itc_path + data_in_line
+#             itc_path_temp = itc_path_temp.replace("\\", "/")
+#
+#             # open itc file to read
+#             with open(itc_path_temp, mode='r', encoding='utf-8') as itc:
+#                 itc_data_in_line = itc.readline()
+#
+#                 # Delete " "
+#                 itc_data_in_line = itc_data_in_line.strip()
+#
+#                 # This is the flag stop to read itc file
+#                 stop_itc = -1
+#
+#                 # Clear the list of image
+#                 image_list.clear()
+#
+#                 # Create a .csv file to write
+#                 csv_path = save_path + "set.csv"
+#                 csv = open(csv_path, "w")
+#                 csv_data_temp = "No, Image, Content \n"
+#                 csv.write(csv_data_temp)
+#
+#                 while stop_itc == -1:
+#
+#                     # Find comment tag and disable all of it -- still not work
+#                     found_start_comment = itc_data_in_line.find("<!--")
+#                     itc_data_in_line = itc_data_in_line.replace("<!--", "")
+#                     if found_start_comment != -1:
+#                         found_stop_comment = itc_data_in_line.find("-->")
+#                         while found_stop_comment == -1:
+#                             itc_data_in_line = itc.readline()
+#                             itc_data_in_line = itc_data_in_line.strip()
+#
+#                     # Find image tag
+#                     found_image = itc_data_in_line.find("<Image>")
+#                     # If there is image tag
+#                     if found_image != -1:
+#                         # Delete image tag
+#                         image_path_temp = itc_data_in_line.replace("<Image>", "")
+#                         # Read the path of image
+#                         image_path = image_origin_path + "/" + image_path_temp
+#                         image_path = image_path.replace("\\", "/")
+#                         basename = os.path.basename(image_path)
+#                         image_new_path = save_path + basename
+#                         # Copy image to temp folder
+#                         shutil.copy(image_path, image_new_path)
+#                         image_list.append(basename)
+#                         # Write No. and image name to a temp variable
+#                         csv_data_temp = '0, ' + basename + ', '
+#
+#                     # Find expected_data tag
+#                     found_expected_data = itc_data_in_line.find("<expected_data>")
+#                     # If there is expected_data tag
+#                     if found_expected_data != -1:
+#                         # Delete expected_data tag
+#                         expected_data = itc_data_in_line.replace("<expected_data>", "")
+#                         # Add "" to the beginning and the end of expected date
+#                         expected_data = '"' + expected_data + '"'
+#                         # Add it to temp variable
+#                         csv_data_temp = csv_data_temp + expected_data + ' \n'
+#                         # Write data from temp variable to csv file
+#                         csv.write(csv_data_temp)
+#
+#                     # Read the next line of itc file
+#                     itc_data_in_line = itc.readline()
+#                     # Delete " "
+#                     itc_data_in_line = itc_data_in_line.strip()
+#                     # Find stop tag
+#                     stop_itc = itc_data_in_line.find("</Img_config>")
+#                 # Close csv file
+#                 csv.close()
+#
+#         # Read the next line of load file
+#         data_in_line = f.readline()
+#         temp = data_in_line.find("</VLUTT_Config>")
+#         if temp != -1:
+#             stop = 1
+#         data_in_line = data_in_line.strip()
 
-    # Delete " " from data
-    data_in_line = data_in_line.strip()
+tree = ET.parse('C:/VL_EVL/vl_test_tool_config/Test_Suite/Function/VL5.load')
+root = tree.getroot()
 
-    # Stop flag for while loop
-    stop = 0
+for elem in root:
+    sym_name = elem.text.strip()
+    address_level_1 = save_path + sym_name
+    os.makedirs(address_level_1)
+    address_level_1 = address_level_1 + "/"
+    print("Symbology: ", sym_name)
 
-    while stop != 1:
+    for sub in elem:
+        type_name = sub.text.strip()
+        type_name = reformat_folder_name(type_name)
+        address_level_2 = address_level_1 + type_name
+        os.makedirs(address_level_2)
+        address_level_2 = address_level_2 + "/"
+        print("Test type: ", type_name)
 
-        # Find sym tag
-        found_sym = data_in_line.find("<symbology>")
+        for s_sub in sub:
+            testcase_id = s_sub.find('ExpectResultID').text
+            address_level_3 = address_level_2 + testcase_id
+            os.makedirs(address_level_3)
+            print("Testcase ID: ", testcase_id)
 
-        # If there is sym tag in the line
-        if found_sym != -1:
-            # Clear sym tag
-            data_in_line = data_in_line.strip("<symbology>")
-            # Change " " to "_"
-            data_in_line = data_in_line.replace(" ", "_")
-            # Create grand folder of Sym
-            address_level_1 = create_folder(data_in_line, save_path)
-            address_level_1 = address_level_1 + "/"
-            print("Test sym: ", data_in_line)
+            robo_path_des = address_level_3 + "/test.robot"
+            shutil.copy(robo_path, robo_path_des)
 
-        # Find Test Type tag
-        found_type = data_in_line.find("<Test_Type>")
+            vlc_path = s_sub.find('VLC_Path').text.replace("\\", "/")
+            vlc_sou = vlc_itc_path + vlc_path
+            vlc_des = address_level_3 + "/" + testcase_id + ".vlc"
+            shutil.copy(vlc_sou, vlc_des)
 
-        # If there is a test type tag
-        if found_type != -1:
-            # Delete Test Type tag
-            data_in_line = data_in_line.replace("<Test_Type>", "")
-            # If there is special character in Test Type, delete it
-            if not data_in_line.isalnum():
-                data_in_line = reformat_folder_name(data_in_line)
+            itc_path = s_sub.find('Img_Path').text.replace("\\", "/")
+            itc_sou = vlc_itc_path + itc_path
+            itc_file = ET.parse(itc_sou)
+            read_itc_file = itc_file.getroot()
+            print("Path of itc file", itc_sou)
 
-            # Create father folder with the name is test type
-            address_level_2 = create_folder(data_in_line, address_level_1)
-            address_level_2 = address_level_2 + "/"
-            print("Test type: ", data_in_line)
+            csv_path = address_level_3 + "/" + testcase_id + "set.csv"
+            csv = open(csv_path, "w")
+            csv_data = "No, Image, Content \n"
+            csv.write(csv_data)
 
-        # Find ExpectResultID tag
-        found_id = data_in_line.find("<ExpectResultID>")
+            for itc_elem in read_itc_file:
+                image_path = itc_elem.text.strip()
+                image_path = image_path.replace("\\", "/")
+                image_sou = image_origin_path + image_path
+                image_name = os.path.basename(image_sou)
+                image_des = address_level_3 + "/" + image_name
+                shutil.copy(image_sou, image_des)
+                print("Copy image ", image_name, "success")
 
-        # If there is a ExpectResultID tag
-        if found_id != -1:
-            # Delete ExpectResultID open tag
-            data_in_line = data_in_line[16:]
-            # Delete ExpectResultID close tag
-            data_in_line = data_in_line.replace("</ExpectResultID>", "")
-            # Change " " to "_"
-            data_in_line = data_in_line.replace(" ", "_")
-            # Create test case folder with name is ExpectResultID
-            address_level_3 = create_folder(data_in_line, address_level_2)
+                continue_flag = itc_elem.find("expected_data")
+                if continue_flag is None:
+                    continue
 
-            # Copy vlc file to testcase folder
-            vlc_new_path = address_level_3 + "/" + data_in_line + ".vlc"
-            shutil.copy(vlc_temp, vlc_new_path)
-            os.remove(vlc_temp)
-
-            # Copy robo file to testcase folder
-            robo_path = address_level_3 + "/test.robot"
-            copy_test_robot(robo_path)
-            print("Test case: ", data_in_line)
-
-            # Image_list is list of image name that read from itc file
-            for x in image_list:
-                copy_flag = 0
-                image_path = address_level_3 + "/" + x
-                image_temp_path = save_path + x
-                list_file = os.listdir(save_path)
-                # If the image is already in temp folder, copy flag = 1
-                for y in list_file:
-                    if y == x:
-                        copy_flag = 1
-                # If copy flag = 1, copy image file to testcase folder
-                if copy_flag == 1:
-                    shutil.move(image_temp_path, image_path)
-                    print("Move file ", x, " success")
-                # Announce that the image is already in side the testcase folder
+                expected_data = ""
+                if itc_elem.find("expected_data").text is None:
+                    expected_data = '""'
                 else:
-                    print("----- itc file contain 2 ", x, ", check in ", address_level_3, "-----")
+                    expected_data = '"' + expected_data + '"'
+                csv_data = "0, " + image_name + ", " + expected_data + " \n"
+                csv.write(csv_data)
+                print("Write data ", csv_data, " success ")
 
-            # Copy csv file to test case folder
-            csv_path_temp = save_path + "set.csv"
-            csv_path = address_level_3 + "/" + data_in_line + "set.csv"
-            shutil.copy(csv_path_temp, csv_path)
-            print("Create csv file success")
-            os.remove(csv_path_temp)
-
-        # Find VLC_Path tag
-        found_vlc = data_in_line.find("<VLC_Path>")
-        # If there is VLC_Path
-        if found_vlc != -1:
-            # Delete open tag and close tag
-            data_in_line = data_in_line.strip("<VLC_Path>")
-            data_in_line = data_in_line.strip("</VLC_Path>")
-            # vlc path temp is the absolute path to vlc folder in load file
-            vlc_path_temp = vlc_itc_path + data_in_line
-            vlc_path_temp = vlc_path_temp.replace("\\", "/")
-            # Copy it to temp folder
-            shutil.copy(vlc_path_temp, vlc_temp)
-            print("Copied vlc file to ", vlc_path_temp)
-
-        # Find Img_Path tag
-        found_itc = data_in_line.find("<Img_Path>")
-        # If there is Img_Path
-        if found_itc != -1:
-            # Delete open tag and close tag
-            data_in_line = data_in_line.strip("<Img_Path>")
-            data_in_line = data_in_line.strip("</Img_Path>")
-
-            # itc_path_temp is the absolute path to itc file that written in load file
-            itc_path_temp = vlc_itc_path + data_in_line
-            itc_path_temp = itc_path_temp.replace("\\", "/")
-
-            # open itc file to read
-            with open(itc_path_temp, mode='r', encoding='utf-8') as itc:
-                itc_data_in_line = itc.readline()
-
-                # Delete " "
-                itc_data_in_line = itc_data_in_line.strip()
-
-                # This is the flag stop to read itc file
-                stop_itc = -1
-
-                # Clear the list of image
-                image_list.clear()
-
-                # Create a .csv file to write
-                csv_path = save_path + "set.csv"
-                csv = open(csv_path, "w")
-                csv_data_temp = "No, Image, Content \n"
-                csv.write(csv_data_temp)
-
-                while stop_itc == -1:
-
-                    # Find comment tag and disable all of it -- still not work
-                    found_start_comment = itc_data_in_line.find("<!--")
-                    itc_data_in_line = itc_data_in_line.replace("<!--", "")
-                    if found_start_comment != -1:
-                        found_stop_comment = itc_data_in_line.find("-->")
-                        while found_stop_comment == -1:
-                            itc_data_in_line = itc.readline()
-                            itc_data_in_line = itc_data_in_line.strip()
-
-                    # Find image tag
-                    found_image = itc_data_in_line.find("<Image>")
-                    # If there is image tag
-                    if found_image != -1:
-                        # Delete image tag
-                        image_path_temp = itc_data_in_line.replace("<Image>", "")
-                        # Read the path of image
-                        image_path = image_origin_path + "/" + image_path_temp
-                        image_path = image_path.replace("\\", "/")
-                        basename = os.path.basename(image_path)
-                        image_new_path = save_path + basename
-                        # Copy image to temp folder
-                        shutil.copy(image_path, image_new_path)
-                        image_list.append(basename)
-                        # Write No. and image name to a temp variable
-                        csv_data_temp = '0, ' + basename + ', '
-
-                    # Find expected_data tag
-                    found_expected_data = itc_data_in_line.find("<expected_data>")
-                    # If there is expected_data tag
-                    if found_expected_data != -1:
-                        # Delete expected_data tag
-                        expected_data = itc_data_in_line.replace("<expected_data>", "")
-                        # Add "" to the beginning and the end of expected date
-                        expected_data = '"' + expected_data + '"'
-                        # Add it to temp variable
-                        csv_data_temp = csv_data_temp + expected_data + ' \n'
-                        # Write data from temp variable to csv file
-                        csv.write(csv_data_temp)
-
-                    # Read the next line of itc file
-                    itc_data_in_line = itc.readline()
-                    # Delete " "
-                    itc_data_in_line = itc_data_in_line.strip()
-                    # Find stop tag
-                    stop_itc = itc_data_in_line.find("</Img_config>")
-                # Close csv file
-                csv.close()
-
-        # Read the next line of load file
-        data_in_line = f.readline()
-        temp = data_in_line.find("</VLUTT_Config>")
-        if temp != -1:
-            stop = 1
-        data_in_line = data_in_line.strip()
+            csv.close()
