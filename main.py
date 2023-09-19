@@ -132,7 +132,7 @@ folder_originimage_button.grid(row=4, column=0)
 folder_originimage_label = tk.Label(window, text=image_origin_path, fg="blue")
 folder_originimage_label.grid(row=4, column=1)
 
-OK_button = tk.Button(window, text="OK", command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"), folder_testresult_label.cget("text"), folder_config_label.cget("text"), folder_originimage_label.cget("text")))
+OK_button = tk.Button(window, text="OK", command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"), folder_testresult_label.cget("text") + "/", folder_config_label.cget("text") + "/", folder_originimage_label.cget("text") + "/"))
 OK_button.grid(row=5, column=0)
 
 window.mainloop()
