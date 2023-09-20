@@ -13,7 +13,7 @@ test_type_path = ""
 # Address of testcase folder
 TCID_path = ""
 
-#Read global variables from csv file
+# Read global variables from csv file
 with open('global_vars.csv', 'r') as file:
     reader = csv.reader(file)
     for row in reader:
@@ -23,13 +23,16 @@ with open('global_vars.csv', 'r') as file:
         vlc_itc_path = row[3]
         image_origin_path = row[4]
 
+
 def choosefile_insertlabel(filepath, dialogname, label):
     filepath = filedialog.askopenfilename(title=dialogname)
     label.config(text=filepath)
 
+
 def choosefolder_insertlabel(folderpath, dialogname, label):
     folderpath = filedialog.askdirectory(title=dialogname)
     label.config(text=folderpath + "/")
+
 
 # To delete special character
 def reformat_folder_name(folder_name):
@@ -39,8 +42,9 @@ def reformat_folder_name(folder_name):
             temp_name = temp_name + char
     return temp_name
 
+
 def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path):
-    #Write global variables to csv file
+    # Write global variables to csv file
     with open('global_vars.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path])
@@ -51,6 +55,11 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
     for symbology_content in root:
         sym_name = symbology_content.text.strip()
         symbology_path = test_result_path + sym_name
+        print(symbology_path)
+        list_folder = os.listdir(test_result_path)
+        for sub_folder in list_folder:
+            if sub_folder == sym_name:
+                shutil.rmtree(symbology_path)
         os.makedirs(symbology_path)
         print("Symbology: ", sym_name)
 
@@ -133,32 +142,47 @@ window = tk.Tk()
 window.title("Convert TestSuite")
 window.geometry("700x300")
 
-file_load_button = tk.Button(window, text="Load File", command=lambda: choosefile_insertlabel(file_load_path, "Choose load file", file_load_label))
+file_load_button = tk.Button(window, text="Load File",
+                             command=lambda: choosefile_insertlabel(file_load_path, "Choose load file",
+                                                                    file_load_label))
 file_load_button.grid(row=0, column=0, sticky='w')
 file_load_label = tk.Label(window, text=file_load_path, fg="blue")
 file_load_label.grid(row=0, column=1, sticky='w')
 
-file_robot_button = tk.Button(window, text="test.robot File", command=lambda: choosefile_insertlabel(robo_path, "Choose test.robot file", file_robot_label))
+file_robot_button = tk.Button(window, text="test.robot File",
+                              command=lambda: choosefile_insertlabel(robo_path, "Choose test.robot file",
+                                                                     file_robot_label))
 file_robot_button.grid(row=1, column=0, sticky='w')
 file_robot_label = tk.Label(window, text=robo_path, fg="blue")
 file_robot_label.grid(row=1, column=1, sticky='w')
 
-folder_testresult_button = tk.Button(window, text="TestResult Folder", command=lambda: choosefolder_insertlabel(test_result_path, "Choose TestResult folder", folder_testresult_label))
+folder_testresult_button = tk.Button(window, text="TestResult Folder",
+                                     command=lambda: choosefolder_insertlabel(test_result_path,
+                                                                              "Choose TestResult folder",
+                                                                              folder_testresult_label))
 folder_testresult_button.grid(row=2, column=0, sticky='w')
 folder_testresult_label = tk.Label(window, text=test_result_path, fg="blue")
 folder_testresult_label.grid(row=2, column=1, sticky='w')
 
-folder_config_button = tk.Button(window, text="Config Folder", command=lambda: choosefolder_insertlabel(vlc_itc_path, "Choose config folder", folder_config_label))
+folder_config_button = tk.Button(window, text="Config Folder",
+                                 command=lambda: choosefolder_insertlabel(vlc_itc_path, "Choose config folder",
+                                                                          folder_config_label))
 folder_config_button.grid(row=3, column=0, sticky='w')
 folder_config_label = tk.Label(window, text=vlc_itc_path, fg="blue")
 folder_config_label.grid(row=3, column=1, sticky='w')
 
-folder_originimage_button = tk.Button(window, text="Origin Image Folder", command=lambda: choosefolder_insertlabel(image_origin_path, "Choose origin image folder", folder_originimage_label))
+folder_originimage_button = tk.Button(window, text="Origin Image Folder",
+                                      command=lambda: choosefolder_insertlabel(image_origin_path,
+                                                                               "Choose origin image folder",
+                                                                               folder_originimage_label))
 folder_originimage_button.grid(row=4, column=0, sticky='w')
 folder_originimage_label = tk.Label(window, text=image_origin_path, fg="blue")
 folder_originimage_label.grid(row=4, column=1, sticky='w')
 
-OK_button = tk.Button(window, text="OK", command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"), folder_testresult_label.cget("text"), folder_config_label.cget("text"), folder_originimage_label.cget("text")))
+OK_button = tk.Button(window, text="OK",
+                      command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"),
+                                          folder_testresult_label.cget("text"), folder_config_label.cget("text"),
+                                          folder_originimage_label.cget("text")))
 OK_button.grid(row=5, column=1, sticky='w')
 
 window.mainloop()
