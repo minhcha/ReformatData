@@ -3,6 +3,7 @@ import shutil
 import xml.etree.ElementTree as ET
 import tkinter as tk
 from tkinter import ttk, filedialog
+import csv
 
 # Global variable:
 # Address of sym folder
@@ -12,12 +13,15 @@ test_type_path = ""
 # Address of testcase folder
 TCID_path = ""
 
-file_load_path = ""
-robo_path = ""
-test_result_path = ""
-vlc_itc_path = ""
-image_origin_path = ""
-
+#Read global variables from csv file
+with open('global_vars.csv', 'r') as file:
+    reader = csv.reader(file)
+    for row in reader:
+        file_load_path = row[0]
+        robo_path = row[1]
+        test_result_path = row[2]
+        vlc_itc_path = row[3]
+        image_origin_path = row[4]
 
 def choosefile_insertlabel(filepath, dialogname, label):
     filepath = filedialog.askopenfilename(title=dialogname)
@@ -25,7 +29,7 @@ def choosefile_insertlabel(filepath, dialogname, label):
 
 def choosefolder_insertlabel(folderpath, dialogname, label):
     folderpath = filedialog.askdirectory(title=dialogname)
-    label.config(text=folderpath)
+    label.config(text=folderpath + "/")
 
 # To delete special character
 def reformat_folder_name(folder_name):
@@ -36,6 +40,11 @@ def reformat_folder_name(folder_name):
     return temp_name
 
 def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path):
+    #Write global variables to csv file
+    with open('global_vars.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path])
+
     tree = ET.parse(file_load_path)
     root = tree.getroot()
 
@@ -133,7 +142,7 @@ folder_originimage_button.grid(row=4, column=0, sticky='w')
 folder_originimage_label = tk.Label(window, text=image_origin_path, fg="blue")
 folder_originimage_label.grid(row=4, column=1, sticky='w')
 
-OK_button = tk.Button(window, text="OK", command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"), folder_testresult_label.cget("text") + "/", folder_config_label.cget("text") + "/", folder_originimage_label.cget("text") + "/"))
+OK_button = tk.Button(window, text="OK", command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"), folder_testresult_label.cget("text"), folder_config_label.cget("text"), folder_originimage_label.cget("text")))
 OK_button.grid(row=5, column=1, sticky='w')
 
 window.mainloop()
