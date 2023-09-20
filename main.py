@@ -1,9 +1,9 @@
 import os
 import shutil
 import xml.etree.ElementTree as ET
+import csv
 import tkinter as tk
 from tkinter import ttk, filedialog
-import csv
 
 # Global variable:
 # Address of sym folder
@@ -63,7 +63,7 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
 
             for testcase_content in test_type_content:
                 testcase_id = testcase_content.find('ExpectResultID').text
-                TCID_path = test_type_path + "/"+ testcase_id
+                TCID_path = test_type_path + "/" + testcase_id
                 os.makedirs(TCID_path)
                 print("Testcase ID: ", testcase_id)
 
@@ -84,9 +84,11 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                 print("Path of itc file", itc_sou)
 
                 csv_path = TCID_path + "/" + itc_name + "_set.csv"
-                csv = open(csv_path, "w")
-                csv_data = "No,Image,Content\n"
-                csv.write(csv_data)
+                csv_file = open(csv_path, "w", newline="")
+                # csv_data = "No,Image,Content\n"
+                writer_csv_file = csv.writer(csv_file)
+                writer_csv_file.writerow(['No', 'Image', 'Content'])
+                # csv_file.write(csv_data)
 
                 for itc_symbology_content in read_itc_file:
                     image_path = itc_symbology_content.text.strip()
@@ -96,23 +98,37 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                     image_des = TCID_path + "/" + image_name
                     shutil.copy(image_sou, image_des)
                     print("Copy image ", image_name, "success")
+                    num = 0
 
                     continue_flag = itc_symbology_content.find("expected_data")
                     if continue_flag is None:
-                        continue
-
-                    expected_data = itc_symbology_content.find("expected_data").text
-                    if expected_data is None:
-                        expected_data = '""'
+                        for image_option in itc_symbology_content:
+                            for label_option in image_option:
+                                expected_data = label_option.find("expected_data").text
+                                if expected_data is None:
+                                    expected_data = '""'
+                                else:
+                                    expected_data = '"' + expected_data + '"'
+                                csv_data = str(num) + ',' + image_name + ',""' + expected_data + '"\n'
+                                writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                                # csv_file.write(csv_data)
+                                print("Write data ", csv_data, " success ")
+                                num = num + 1
                     else:
-                        expected_data = '"' + expected_data + '"'
-                    csv_data = '0,' + image_name + ',""' + expected_data + '"\n'
-                    csv.write(csv_data)
-                    print("Write data ", csv_data, " success ")
+                        expected_data = itc_symbology_content.find("expected_data").text
+                        if expected_data is None:
+                            expected_data = '""'
+                        else:
+                            expected_data = '"' + expected_data + '"'
+                        csv_data = '0,' + image_name + ',""' + expected_data + '"\n'
+                        # csv_file.write(csv_data)
+                        writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                        print("Write data ", csv_data, " success ")
 
-                csv.close()
+                csv_file.close()
 
-###GUI###
+
+# GUI
 window = tk.Tk()
 window.title("Convert TestSuite")
 window.geometry("700x300")
