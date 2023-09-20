@@ -1,65 +1,37 @@
-# Setting:
-#   Have to paste test.robot file to save_path before run the code
-#   Input some required paths into variables below
-
-# Still not cover yet:
-#   There are more than 1 line of expected data
-#   Comment tag   =>   Had coded to cover it but not work
-#   If there is exception when you run the code, you have to:
-#       1. Delete all data in save_path but test.robot file and run from the beginning
-#       or
-#       2. Change data in load file to save your time
-#   This bug appears some time in different place, Still don't know the reason
-#       PermissionError: [WinError 32]
-#       The process cannot access the file because it is being used by another process:
-#       'C:/TestData/C128_SubsetC_FNC1_Pos_4_7Chars.bmp'
-#       'C:/TestData/UPCA_PW4.bmp'
-#       'C:/TestData/EAN8_P2.bmp'
-#   =>  Maybe because of the work of another app ???
-
 import os
 import shutil
-import array
 import xml.etree.ElementTree as ET
-
-# Variable
-
-# Required path
-file_load_path = "C:/VL_EVL/vl_test_tool_config/Test_Suite/Function/VL5.load"
-# Folder that used to save data
-save_path = "C:/TestData/"
-# A temp place to save vlc file
-vlc_temp = save_path + "config.vlc"
-# Place that save vlc file and itc file
-vlc_itc_path = "C:/VL_EVL/vl_test_tool_config/"
-# Have to paste the test.robot file to save path before run the code
-test_robot_path = save_path + "test.robot"
-# Image folder
-image_origin_path = "//dl44h0lb3/IP-TECH/"
-# Robo file path
-robo_path = "C:/TestData/test.robot"
+import csv
+import tkinter as tk
+from tkinter import ttk, filedialog
 
 # Global variable:
 # Address of sym folder
-address_level_1 = ""
+symbology_path = ""
 # Address of test type folder
-address_level_2 = ""
+test_type_path = ""
 # Address of testcase folder
-address_level_3 = ""
-# List of image will be read in itc file
-image_list = [1, 3.5, "Hello"]
+TCID_path = ""
+
+# Read global variables from csv file
+with open('global_vars.csv', 'r') as file:
+    reader = csv.reader(file)
+    for row in reader:
+        file_load_path = row[0]
+        robo_path = row[1]
+        test_result_path = row[2]
+        vlc_itc_path = row[3]
+        image_origin_path = row[4]
 
 
-# def create_folder(folder_name, father_address):
-#     print(folder_name)
-#     address = father_address + folder_name
-#     os.makedirs(address)
-#     print("Created folder: ", address)
-#     return address
-#
-#
-# def copy_test_robot(path):
-#     shutil.copy(test_robot_path, path)
+def choosefile_insertlabel(filepath, dialogname, label):
+    filepath = filedialog.askopenfilename(title=dialogname)
+    label.config(text=filepath)
+
+
+def choosefolder_insertlabel(folderpath, dialogname, label):
+    folderpath = filedialog.askdirectory(title=dialogname)
+    label.config(text=folderpath + "/")
 
 
 # To delete special character
@@ -71,263 +43,146 @@ def reformat_folder_name(folder_name):
     return temp_name
 
 
-# # Open file load
-# with open(file_load_path, mode='r', encoding='utf-8') as f:
-#     # Read data
-#     data_in_line = f.readline()
-#
-#     # Delete " " from data
-#     data_in_line = data_in_line.strip()
-#
-#     # Stop flag for while loop
-#     stop = 0
-#
-#     while stop != 1:
-#
-#         # Find sym tag
-#         found_sym = data_in_line.find("<symbology>")
-#
-#         # If there is sym tag in the line
-#         if found_sym != -1:
-#             # Clear sym tag
-#             data_in_line = data_in_line.strip("<symbology>")
-#             # Change " " to "_"
-#             data_in_line = data_in_line.replace(" ", "_")
-#             # Create grand folder of Sym
-#             address_level_1 = create_folder(data_in_line, save_path)
-#             address_level_1 = address_level_1 + "/"
-#             print("Test sym: ", data_in_line)
-#
-#         # Find Test Type tag
-#         found_type = data_in_line.find("<Test_Type>")
-#
-#         # If there is a test type tag
-#         if found_type != -1:
-#             # Delete Test Type tag
-#             data_in_line = data_in_line.replace("<Test_Type>", "")
-#             # If there is special character in Test Type, delete it
-#             if not data_in_line.isalnum():
-#                 data_in_line = reformat_folder_name(data_in_line)
-#
-#             # Create father folder with the name is test type
-#             address_level_2 = create_folder(data_in_line, address_level_1)
-#             address_level_2 = address_level_2 + "/"
-#             print("Test type: ", data_in_line)
-#
-#         # Find ExpectResultID tag
-#         found_id = data_in_line.find("<ExpectResultID>")
-#
-#         # If there is a ExpectResultID tag
-#         if found_id != -1:
-#             # Delete ExpectResultID open tag
-#             data_in_line = data_in_line[16:]
-#             # Delete ExpectResultID close tag
-#             data_in_line = data_in_line.replace("</ExpectResultID>", "")
-#             # Change " " to "_"
-#             data_in_line = data_in_line.replace(" ", "_")
-#             # Create test case folder with name is ExpectResultID
-#             address_level_3 = create_folder(data_in_line, address_level_2)
-#
-#             # Copy vlc file to testcase folder
-#             vlc_new_path = address_level_3 + "/" + data_in_line + ".vlc"
-#             shutil.copy(vlc_temp, vlc_new_path)
-#             os.remove(vlc_temp)
-#
-#             # Copy robo file to testcase folder
-#             robo_path = address_level_3 + "/test.robot"
-#             copy_test_robot(robo_path)
-#             print("Test case: ", data_in_line)
-#
-#             # Image_list is list of image name that read from itc file
-#             for x in image_list:
-#                 copy_flag = 0
-#                 image_path = address_level_3 + "/" + x
-#                 image_temp_path = save_path + x
-#                 list_file = os.listdir(save_path)
-#                 # If the image is already in temp folder, copy flag = 1
-#                 for y in list_file:
-#                     if y == x:
-#                         copy_flag = 1
-#                 # If copy flag = 1, copy image file to testcase folder
-#                 if copy_flag == 1:
-#                     shutil.move(image_temp_path, image_path)
-#                     print("Move file ", x, " success")
-#                 # Announce that the image is already in side the testcase folder
-#                 else:
-#                     print("----- itc file contain 2 ", x, ", check in ", address_level_3, "-----")
-#
-#             # Copy csv file to test case folder
-#             csv_path_temp = save_path + "set.csv"
-#             csv_path = address_level_3 + "/" + data_in_line + "set.csv"
-#             shutil.copy(csv_path_temp, csv_path)
-#             print("Create csv file success")
-#             os.remove(csv_path_temp)
-#
-#         # Find VLC_Path tag
-#         found_vlc = data_in_line.find("<VLC_Path>")
-#         # If there is VLC_Path
-#         if found_vlc != -1:
-#             # Delete open tag and close tag
-#             data_in_line = data_in_line.strip("<VLC_Path>")
-#             data_in_line = data_in_line.strip("</VLC_Path>")
-#             # vlc path temp is the absolute path to vlc folder in load file
-#             vlc_path_temp = vlc_itc_path + data_in_line
-#             vlc_path_temp = vlc_path_temp.replace("\\", "/")
-#             # Copy it to temp folder
-#             shutil.copy(vlc_path_temp, vlc_temp)
-#             print("Copied vlc file to ", vlc_path_temp)
-#
-#         # Find Img_Path tag
-#         found_itc = data_in_line.find("<Img_Path>")
-#         # If there is Img_Path
-#         if found_itc != -1:
-#             # Delete open tag and close tag
-#             data_in_line = data_in_line.strip("<Img_Path>")
-#             data_in_line = data_in_line.strip("</Img_Path>")
-#
-#             # itc_path_temp is the absolute path to itc file that written in load file
-#             itc_path_temp = vlc_itc_path + data_in_line
-#             itc_path_temp = itc_path_temp.replace("\\", "/")
-#
-#             # open itc file to read
-#             with open(itc_path_temp, mode='r', encoding='utf-8') as itc:
-#                 itc_data_in_line = itc.readline()
-#
-#                 # Delete " "
-#                 itc_data_in_line = itc_data_in_line.strip()
-#
-#                 # This is the flag stop to read itc file
-#                 stop_itc = -1
-#
-#                 # Clear the list of image
-#                 image_list.clear()
-#
-#                 # Create a .csv file to write
-#                 csv_path = save_path + "set.csv"
-#                 csv = open(csv_path, "w")
-#                 csv_data_temp = "No, Image, Content \n"
-#                 csv.write(csv_data_temp)
-#
-#                 while stop_itc == -1:
-#
-#                     # Find comment tag and disable all of it -- still not work
-#                     found_start_comment = itc_data_in_line.find("<!--")
-#                     itc_data_in_line = itc_data_in_line.replace("<!--", "")
-#                     if found_start_comment != -1:
-#                         found_stop_comment = itc_data_in_line.find("-->")
-#                         while found_stop_comment == -1:
-#                             itc_data_in_line = itc.readline()
-#                             itc_data_in_line = itc_data_in_line.strip()
-#
-#                     # Find image tag
-#                     found_image = itc_data_in_line.find("<Image>")
-#                     # If there is image tag
-#                     if found_image != -1:
-#                         # Delete image tag
-#                         image_path_temp = itc_data_in_line.replace("<Image>", "")
-#                         # Read the path of image
-#                         image_path = image_origin_path + "/" + image_path_temp
-#                         image_path = image_path.replace("\\", "/")
-#                         basename = os.path.basename(image_path)
-#                         image_new_path = save_path + basename
-#                         # Copy image to temp folder
-#                         shutil.copy(image_path, image_new_path)
-#                         image_list.append(basename)
-#                         # Write No. and image name to a temp variable
-#                         csv_data_temp = '0, ' + basename + ', '
-#
-#                     # Find expected_data tag
-#                     found_expected_data = itc_data_in_line.find("<expected_data>")
-#                     # If there is expected_data tag
-#                     if found_expected_data != -1:
-#                         # Delete expected_data tag
-#                         expected_data = itc_data_in_line.replace("<expected_data>", "")
-#                         # Add "" to the beginning and the end of expected date
-#                         expected_data = '"' + expected_data + '"'
-#                         # Add it to temp variable
-#                         csv_data_temp = csv_data_temp + expected_data + ' \n'
-#                         # Write data from temp variable to csv file
-#                         csv.write(csv_data_temp)
-#
-#                     # Read the next line of itc file
-#                     itc_data_in_line = itc.readline()
-#                     # Delete " "
-#                     itc_data_in_line = itc_data_in_line.strip()
-#                     # Find stop tag
-#                     stop_itc = itc_data_in_line.find("</Img_config>")
-#                 # Close csv file
-#                 csv.close()
-#
-#         # Read the next line of load file
-#         data_in_line = f.readline()
-#         temp = data_in_line.find("</VLUTT_Config>")
-#         if temp != -1:
-#             stop = 1
-#         data_in_line = data_in_line.strip()
+def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path):
+    # Write global variables to csv file
+    with open('global_vars.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_path])
 
-tree = ET.parse('C:/VL_EVL/vl_test_tool_config/Test_Suite/Function/VL5.load')
-root = tree.getroot()
+    tree = ET.parse(file_load_path)
+    root = tree.getroot()
 
-for elem in root:
-    sym_name = elem.text.strip()
-    address_level_1 = save_path + sym_name
-    os.makedirs(address_level_1)
-    address_level_1 = address_level_1 + "/"
-    print("Symbology: ", sym_name)
+    for symbology_content in root:
+        sym_name = symbology_content.text.strip()
+        symbology_path = test_result_path + sym_name
+        print(symbology_path)
+        list_folder = os.listdir(test_result_path)
+        for sub_folder in list_folder:
+            if sub_folder == sym_name:
+                shutil.rmtree(symbology_path)
+        os.makedirs(symbology_path)
+        print("Symbology: ", sym_name)
 
-    for sub in elem:
-        type_name = sub.text.strip()
-        type_name = reformat_folder_name(type_name)
-        address_level_2 = address_level_1 + type_name
-        os.makedirs(address_level_2)
-        address_level_2 = address_level_2 + "/"
-        print("Test type: ", type_name)
+        for test_type_content in symbology_content:
+            type_name = test_type_content.text.strip()
+            type_name = reformat_folder_name(type_name)
+            test_type_path = symbology_path + "/" + type_name
+            os.makedirs(test_type_path)
+            print("Test type: ", type_name)
 
-        for s_sub in sub:
-            testcase_id = s_sub.find('ExpectResultID').text
-            address_level_3 = address_level_2 + testcase_id
-            os.makedirs(address_level_3)
-            print("Testcase ID: ", testcase_id)
+            for testcase_content in test_type_content:
+                testcase_id = testcase_content.find('ExpectResultID').text
+                TCID_path = test_type_path + "/" + testcase_id
+                os.makedirs(TCID_path)
+                print("Testcase ID: ", testcase_id)
 
-            robo_path_des = address_level_3 + "/test.robot"
-            shutil.copy(robo_path, robo_path_des)
+                robo_path_des = TCID_path + "/test.robot"
+                shutil.copy(robo_path, robo_path_des)
 
-            vlc_path = s_sub.find('VLC_Path').text.replace("\\", "/")
-            vlc_sou = vlc_itc_path + vlc_path
-            vlc_des = address_level_3 + "/" + testcase_id + ".vlc"
-            shutil.copy(vlc_sou, vlc_des)
+                vlc_path = testcase_content.find('VLC_Path').text.replace("\\", "/")
+                vlc_sou = vlc_itc_path + vlc_path
+                vlc_name = os.path.basename(vlc_sou)
+                vlc_des = TCID_path + "/" + vlc_name
+                shutil.copy(vlc_sou, vlc_des)
 
-            itc_path = s_sub.find('Img_Path').text.replace("\\", "/")
-            itc_sou = vlc_itc_path + itc_path
-            itc_file = ET.parse(itc_sou)
-            read_itc_file = itc_file.getroot()
-            print("Path of itc file", itc_sou)
+                itc_path = testcase_content.find('Img_Path').text.replace("\\", "/")
+                itc_sou = vlc_itc_path + itc_path
+                itc_name = os.path.basename(itc_sou).replace(".itc", "")
+                itc_file = ET.parse(itc_sou)
+                read_itc_file = itc_file.getroot()
+                print("Path of itc file", itc_sou)
 
-            csv_path = address_level_3 + "/" + testcase_id + "set.csv"
-            csv = open(csv_path, "w")
-            csv_data = "No, Image, Content \n"
-            csv.write(csv_data)
+                csv_path = TCID_path + "/" + itc_name + "_set.csv"
+                csv_file = open(csv_path, "w", newline="")
+                # csv_data = "No,Image,Content\n"
+                writer_csv_file = csv.writer(csv_file)
+                writer_csv_file.writerow(['No', 'Image', 'Content'])
+                # csv_file.write(csv_data)
 
-            for itc_elem in read_itc_file:
-                image_path = itc_elem.text.strip()
-                image_path = image_path.replace("\\", "/")
-                image_sou = image_origin_path + image_path
-                image_name = os.path.basename(image_sou)
-                image_des = address_level_3 + "/" + image_name
-                shutil.copy(image_sou, image_des)
-                print("Copy image ", image_name, "success")
+                for itc_symbology_content in read_itc_file:
+                    image_path = itc_symbology_content.text.strip()
+                    image_path = image_path.replace("\\", "/")
+                    image_sou = image_origin_path + image_path
+                    image_name = os.path.basename(image_sou)
+                    image_des = TCID_path + "/" + image_name
+                    shutil.copy(image_sou, image_des)
+                    print("Copy image ", image_name, "success")
+                    num = 0
 
-                continue_flag = itc_elem.find("expected_data")
-                if continue_flag is None:
-                    continue
+                    continue_flag = itc_symbology_content.find("expected_data")
+                    if continue_flag is None:
+                        for image_option in itc_symbology_content:
+                            for label_option in image_option:
+                                expected_data = label_option.find("expected_data").text
+                                if expected_data is None:
+                                    expected_data = '""'
+                                else:
+                                    expected_data = '"' + expected_data + '"'
+                                csv_data = str(num) + ',' + image_name + ',""' + expected_data + '"\n'
+                                writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                                # csv_file.write(csv_data)
+                                print("Write data ", csv_data, " success ")
+                                num = num + 1
+                    else:
+                        expected_data = itc_symbology_content.find("expected_data").text
+                        if expected_data is None:
+                            expected_data = '""'
+                        else:
+                            expected_data = '"' + expected_data + '"'
+                        csv_data = '0,' + image_name + ',""' + expected_data + '"\n'
+                        # csv_file.write(csv_data)
+                        writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                        print("Write data ", csv_data, " success ")
 
-                expected_data = ""
-                if itc_elem.find("expected_data").text is None:
-                    expected_data = '""'
-                else:
-                    expected_data = '"' + expected_data + '"'
-                csv_data = "0, " + image_name + ", " + expected_data + " \n"
-                csv.write(csv_data)
-                print("Write data ", csv_data, " success ")
+                csv_file.close()
 
-            csv.close()
+
+# GUI
+window = tk.Tk()
+window.title("Convert TestSuite")
+window.geometry("700x300")
+
+file_load_button = tk.Button(window, text="Load File",
+                             command=lambda: choosefile_insertlabel(file_load_path, "Choose load file",
+                                                                    file_load_label))
+file_load_button.grid(row=0, column=0, sticky='w')
+file_load_label = tk.Label(window, text=file_load_path, fg="blue")
+file_load_label.grid(row=0, column=1, sticky='w')
+
+file_robot_button = tk.Button(window, text="test.robot File",
+                              command=lambda: choosefile_insertlabel(robo_path, "Choose test.robot file",
+                                                                     file_robot_label))
+file_robot_button.grid(row=1, column=0, sticky='w')
+file_robot_label = tk.Label(window, text=robo_path, fg="blue")
+file_robot_label.grid(row=1, column=1, sticky='w')
+
+folder_testresult_button = tk.Button(window, text="TestResult Folder",
+                                     command=lambda: choosefolder_insertlabel(test_result_path,
+                                                                              "Choose TestResult folder",
+                                                                              folder_testresult_label))
+folder_testresult_button.grid(row=2, column=0, sticky='w')
+folder_testresult_label = tk.Label(window, text=test_result_path, fg="blue")
+folder_testresult_label.grid(row=2, column=1, sticky='w')
+
+folder_config_button = tk.Button(window, text="Config Folder",
+                                 command=lambda: choosefolder_insertlabel(vlc_itc_path, "Choose config folder",
+                                                                          folder_config_label))
+folder_config_button.grid(row=3, column=0, sticky='w')
+folder_config_label = tk.Label(window, text=vlc_itc_path, fg="blue")
+folder_config_label.grid(row=3, column=1, sticky='w')
+
+folder_originimage_button = tk.Button(window, text="Origin Image Folder",
+                                      command=lambda: choosefolder_insertlabel(image_origin_path,
+                                                                               "Choose origin image folder",
+                                                                               folder_originimage_label))
+folder_originimage_button.grid(row=4, column=0, sticky='w')
+folder_originimage_label = tk.Label(window, text=image_origin_path, fg="blue")
+folder_originimage_label.grid(row=4, column=1, sticky='w')
+
+OK_button = tk.Button(window, text="OK",
+                      command=lambda: run(file_load_label.cget("text"), file_robot_label.cget("text"),
+                                          folder_testresult_label.cget("text"), folder_config_label.cget("text"),
+                                          folder_originimage_label.cget("text")))
+OK_button.grid(row=5, column=1, sticky='w')
+
+window.mainloop()
