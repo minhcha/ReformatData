@@ -40,6 +40,8 @@ def reformat_folder_name(folder_name):
     for char in folder_name:
         if char.isalnum():
             temp_name = temp_name + char
+        else:
+            temp_name = temp_name + "_"
     return temp_name
 
 
