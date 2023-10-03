@@ -120,7 +120,7 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                                     expected_data = '""'
                                 else:
                                     expected_data = '"' + expected_data + '"'
-                                csv_data = str(num) + ',' + image_name + ',""' + expected_data + '"\n'
+                                csv_data = str(num) + ',' + image_name + ',' + expected_data + '\n'
                                 writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
                                 # csv_file.write(csv_data)
                                 print("Write data ", csv_data, " success ")
@@ -131,7 +131,7 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                             expected_data = '""'
                         else:
                             expected_data = '"' + expected_data + '"'
-                        csv_data = '0,' + image_name + ',""' + expected_data + '"\n'
+                        csv_data = '0,' + image_name + ',' + expected_data + '\n'
                         # csv_file.write(csv_data)
                         writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
                         print("Write data ", csv_data, " success ")
