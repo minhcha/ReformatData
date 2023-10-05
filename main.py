@@ -107,34 +107,38 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                     image_sou = image_origin_path + image_path
                     image_name = os.path.basename(image_sou)
                     image_des = TCID_path + "/" + image_name
-                    shutil.copy(image_sou, image_des)
-                    print("Copy image ", image_name, "success")
-                    num = 0
+                    try:
+                        shutil.copy(image_sou, image_des)
+                        print("Copy image ", image_name, "success")
 
-                    continue_flag = itc_symbology_content.find("expected_data")
-                    if continue_flag is None:
-                        for image_option in itc_symbology_content:
-                            for label_option in image_option:
-                                expected_data = label_option.find("expected_data").text
-                                if expected_data is None:
-                                    expected_data = ""
-                                else:
-                                    expected_data = expected_data
-                                csv_data = str(num) + ',' + image_name + ',' + expected_data + '\n'
-                                writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
-                                # csv_file.write(csv_data)
-                                print("Write data ", csv_data, " success ")
-                                num = num + 1
-                    else:
-                        expected_data = itc_symbology_content.find("expected_data").text
-                        if expected_data is None:
-                            expected_data = ""
+                        num = 0
+
+                        continue_flag = itc_symbology_content.find("expected_data")
+                        if continue_flag is None:
+                            for image_option in itc_symbology_content:
+                                for label_option in image_option:
+                                    expected_data = label_option.find("expected_data").text
+                                    if expected_data is None:
+                                        expected_data = ""
+                                    else:
+                                        expected_data = expected_data
+                                    csv_data = str(num) + ',' + image_name + ',' + expected_data + '\n'
+                                    writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                                    # csv_file.write(csv_data)
+                                    print("Write data ", csv_data, " success ")
+                                    num = num + 1
                         else:
-                            expected_data = expected_data
-                        csv_data = '0,' + image_name + ',' + expected_data + '\n'
-                        # csv_file.write(csv_data)
-                        writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
-                        print("Write data ", csv_data, " success ")
+                            expected_data = itc_symbology_content.find("expected_data").text
+                            if expected_data is None:
+                                expected_data = ""
+                            else:
+                                expected_data = expected_data
+                            csv_data = '0,' + image_name + ',' + expected_data + '\n'
+                            # csv_file.write(csv_data)
+                            writer_csv_file.writerow([str(num), str(image_name), str(expected_data)])
+                            print("Write data ", csv_data, " success ")
+                    except:
+                        print("Image ", image_name, "doesn't exit!")
 
                 csv_file.close()
 
