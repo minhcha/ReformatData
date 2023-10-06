@@ -106,6 +106,19 @@ def run(file_load_path, robo_path, test_result_path, vlc_itc_path, image_origin_
                     image_path = image_path.replace("\\", "/")
                     image_sou = image_origin_path + image_path
                     image_name = os.path.basename(image_sou)
+
+                    image_in_result_folder = os.listdir(TCID_path)
+                    image_id = 0
+                    for image in image_in_result_folder:
+                        if image.find(image_name) != -1:
+                            image_id = image_id + 1
+                    if image_id != 0:
+                        path = image_sou
+                        temp = path.split("/")
+                        length = len(temp)
+                        grand_folder = temp[length - 3]
+                        image_name = grand_folder + "_" + image_name
+
                     image_des = TCID_path + "/" + image_name
                     try:
                         shutil.copy(image_sou, image_des)
